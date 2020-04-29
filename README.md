@@ -17,7 +17,7 @@ run:
     $ ./online_audio_converter_server
 ## required header
 - Accept-Audio-Format: base64_encoded_json
-  - base64_encode({"codec":"mp3","sampingrate":44100,"channel":2,"bitrate":"96k"})  
+  - base64_encode({"codec":"mp3","samplingrate":44100,"channel":2,"bitrate":"96k"})
 
 ## sample request
 wav to 44k, stereo, 96k, mp3 output:
