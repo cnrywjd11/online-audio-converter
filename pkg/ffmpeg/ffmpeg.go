@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -17,6 +18,8 @@ type OutputFormat struct {
 	SamplingRate int    `json:"samplingrate"`
 	Channel      int    `json:"channel"`
 	Bitrate      string `json:"bitrate"`
+	Speed        string `json:"speed"`
+	Volume       string `json:"volume"`
 }
 
 func generateArgs(ofm *OutputFormat, in *os.File, outName string) []string {
@@ -31,11 +34,25 @@ func generateArgs(ofm *OutputFormat, in *os.File, outName string) []string {
 	if ofm.Bitrate != "" {
 		args = append(args, "-b:a", ofm.Bitrate)
 	}
+	if ofm.Speed != "" && ofm.Volume != "" {
+		speed := PercentageToScale(ofm.Speed)
+		args = append(args, "-filter:a", fmt.Sprintf("volume=%s,atempo=%.1f", ofm.Volume, speed))
+	} else if ofm.Speed != "" {
+		speed := PercentageToScale(ofm.Speed)
+		args = append(args, "-filter:a", fmt.Sprintf("atempo=%.1f", speed))
+	} else if ofm.Volume != "" {
+		args = append(args, "-filter:a", fmt.Sprintf("volume=%s", ofm.Volume))
+	}
 	if ofm.Codec != "" {
 		outName = convertedFileName(outName, ofm.Codec)
 	}
 	args = append(args, outName)
 	return args
+}
+
+func PercentageToScale(percentage string) float64 {
+	scale, _ := strconv.ParseFloat(strings.TrimRight(percentage, "%"), 64)
+	return scale / 100
 }
 
 func convertedFileName(fileName, extension string) string {
